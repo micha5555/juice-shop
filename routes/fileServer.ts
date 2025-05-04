@@ -24,7 +24,7 @@ module.exports = function servePublicFiles () {
   }
 
   function verify (file: string, res: Response, next: NextFunction) {
-    if (file && (endsWithAllowlistedFileType(file) || (file === 'incident-support.kdbx'))) {
+    if (file && (endsWithAllowlistedFileType(file) || (file === 'incident-support.kdbx')) && !containsNullByte(file)) {
       file = security.cutOffPoisonNullByte(file)
 
       challengeUtils.solveIf(challenges.directoryListingChallenge, () => { return file.toLowerCase() === 'acquisitions.md' })
@@ -51,5 +51,8 @@ module.exports = function servePublicFiles () {
 
   function endsWithAllowlistedFileType (param: string) {
     return utils.endsWith(param, '.md') || utils.endsWith(param, '.pdf')
+  }
+  function containsNullByte (param: string) {
+    return utils.contains(param, '%00') || utils.contains(param, '%2500')
   }
 }
